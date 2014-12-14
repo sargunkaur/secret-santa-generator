@@ -1,0 +1,18 @@
+SENDER: email
+USERNAME: email
+PASSWORD: "password"
+FROM: Name <email>
+SUBJECT: Your secret santa recipient is ...
+MESSAGE: 
+    Dear {santa},
+
+        This year you are {santee}'s Secret Santa! 
+
+        The decided spending is approx $10.00.
+
+
+        This message was automagically generated from a computer. 
+
+        I may or may not have written unit tests, so if something is off, please let me know immediately! Sorry for the delay in getting this to y'all!
+
+        script - https://github.com/sargunkaur/secret-santa-generator

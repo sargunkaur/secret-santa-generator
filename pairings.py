@@ -8,42 +8,21 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.MIMEImage import MIMEImage
 
-
-sender = 'sargunjot.kaur@gmail.com'
-
 REQRD = (
 	'USERNAME',
 	'PASSWORD',
 	'FROM',
 	'SUBJECT',
-	'MESSAGE',
 	)
 
 CONFIG_PATH = os.path.join(os.path.dirname(__file__), 'info.yml')
 
-HEADER = """Content-Type: text/html; charset="utf-8"
+HEADER = """Content-Type: text/HTML; charset="utf-8"
 From: {frm}
 To: {to}
-Subject: {subject} 
+Subject: {subject}
 """
 
-html = """\
-   	<html>
-   		<head></head>
-	   		<body>
-	   			<p>Dear {santa}<br>
-	   			<img src="cid:image1">
-			       &nbsp;&nbsp;&nbsp;&nbsp;This year you are <strong>{santee}'s</strong> Secret Santa!<br>
-			       The decided spending is approx $10.00.<br>
-			       This message was automagically generated from a computer. So nothing can possibly go wrong...<br>
-			       But really, I may or may not have written unit tests, so if something is off, please let me know immediately! Sorry for the delay in 
-   getting this to y'all!<br>
-   				   script - https://github.com/sargunkaur/secret-santa-generator<br><br>
-   				   Happy Holidays!<br>
-			    </p>
-	  		</body>
-	</html>
-	"""
 class Person:
 	def __init__(self, name, email):
 		self.name = name
@@ -92,13 +71,11 @@ def main():
 		raise Exception('Not enough participants specified.')
 
 	pairings = create_pairs(participants_list)
-
-
 	config = parse_yaml()
 
+	sender = config['SENDER']
 	username = config['USERNAME']
 	password = config['PASSWORD']
-	message = config['MESSAGE']
 	subject = config['SUBJECT']
 	frm = config['FROM']
 
@@ -108,38 +85,22 @@ def main():
 
 	server = smtplib.SMTP('smtp.gmail.com:587')
 	server.starttls()
-	server.set_debuglevel(2)
+	server.set_debuglevel(1)
 	server.login(username, password)
 
 	for pair in pairings:
 		giver_name = pair.giver.name
 		giver_email = pair.giver.email
 		reciever_name = pair.reciever.name
-		
-		body = html.format(
+		body = (HEADER+config['MESSAGE']).format(frm=frm,
+			to=giver_email,
+			subject=subject,
 			santa=giver_name,
 			santee=reciever_name,
 		)
 
-		msg = MIMEMultipart('alternative')
-		msg['Subject'] = subject
-		msg['FROM'] = frm
-		msg['TO'] = giver_email
-
-		html_format = MIMEText(body, 'html')
-		msg.attach(html_format)
-
-		fp = open('blah.jpg', 'rb')
-    	img = MIMEImage(fp.read())
-    	fp.close()
-
-    	img.add_header('Content-ID', '<image1>',)
-    	msg.attach(img)
-    	
-    	server.sendmail(sender, giver_email, msg.as_string())
-    	print "Successfully sent email"
-
-	server.quit()
-	
+		server.sendmail(sender, giver_email, body)
+		print "Successfully sent email"
+		
 if __name__ == "__main__":
     sys.exit(main())
